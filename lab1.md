@@ -85,6 +85,12 @@ state_interfaces:state_start_arm_1_joint/position
     -> joint_state_broadcaster:state_end_arm_1_joint/position
     -> arm_controller:state_end_arm_1_joint/position
                                                 
+# zad 10.
 
+Dzięki programowi z pakietu moveit_project ręka robota zmienia swoją pozycję na zadaną w programie.
+
+# zad 11.
+
+Po uruchomieniu nowo stworzonego węzła, wziualizowany jest po pierwszym wciśnięciu pokazuje się nad robotem napis planning a następnie napis executing.
 
 

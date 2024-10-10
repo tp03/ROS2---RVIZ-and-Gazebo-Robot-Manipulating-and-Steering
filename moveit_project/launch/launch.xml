@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="moveit_project" exec="moveit_project" name="move" namespace="moveit_project"/>
+</launch>
