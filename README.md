@@ -1,6 +1,10 @@
 # STERO_24z_AntoniKowalski_TomaszZalewski
 
+Authors:
 
+Tomasz Zalewski
+Antoni Kowalski
+Warsaw Technical University
 
 ## Getting started
 
