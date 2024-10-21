@@ -3684,5 +3684,141 @@
         <view_controller>orbit</view_controller>
       </camera>
     </gui>
+    <model name="table">
+      <static>true</static> <!-- Model statyczny, nie będzie się ruszał -->
+      <link name="link">
+        <pose>0.5 0.5 0.5 0 0 0</pose> <!-- Pozycja stolika w świecie -->
+
+        <!-- Blat stolika -->
+        <collision name="collision_blade">
+          <geometry>
+            <box>
+              <size>1 1 0.05</size> <!-- Wymiary blatu: 1m x 1m, grubość 0.05m -->
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.5</mu> <!-- Współczynnik tarcia -->
+                <mu2>0.5</mu2>
+              </ode>
+            </friction>
+          </surface>
+        </collision>
+
+        <visual name="visual_blade">
+          <geometry>
+            <box>
+              <size>1 1 0.05</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.5 0.3 1</ambient> <!-- Kolor stolika -->
+            <diffuse>0.7 0.5 0.3 1</diffuse>
+          </material>
+        </visual>
+
+        <!-- Nogi stolika -->
+        <collision name="collision_leg_1">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length> <!-- Wysokość nogi -->
+            </cylinder>
+          </geometry>
+          <pose>-0.45 -0.45 0.25 0 0 0</pose> <!-- Pozycja pierwszej nogi -->
+        </collision>
+
+        <visual name="visual_leg_1">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>-0.45 -0.45 0.25 0 0 0</pose>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient> <!-- Kolor nogi -->
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+          </material>
+        </visual>
+
+        <!-- Druga noga -->
+        <collision name="collision_leg_2">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>0.45 -0.45 0.25 0 0 0</pose>
+        </collision>
+
+        <visual name="visual_leg_2">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>0.45 -0.45 0.25 0 0 0</pose>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+          </material>
+        </visual>
+
+        <!-- Trzecia noga -->
+        <collision name="collision_leg_3">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>-0.45 0.45 0.25 0 0 0</pose>
+        </collision>
+
+        <visual name="visual_leg_3">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>-0.45 0.45 0.25 0 0 0</pose>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+          </material>
+        </visual>
+
+        <!-- Czwarta noga -->
+        <collision name="collision_leg_4">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>0.45 0.45 0.25 0 0 0</pose>
+        </collision>
+
+        <visual name="visual_leg_4">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <pose>0.45 0.45 0.25 0 0 0</pose>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+          </material>
+        </visual>
+
+      </link>
+    </model>
   </world>
 </sdf>

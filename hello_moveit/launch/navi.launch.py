@@ -58,13 +58,13 @@ def public_nav_function(context, *args, **kwargs):
     base_type = read_launch_argument("base_type", context)
     world_name = read_launch_argument("world_name", context)
     actions = []
-    # stero_map = get_package_share_directory("stero_map")
-    stero_map = "~/stero/src/STERO_24z_AntoniKowalski_TomaszZalewski/stero_map"
-    param_file = os.path.join(stero_map, "params", "tiago_" + base_type + "_nav_public_sim.yaml")
+    pkg_path = get_package_share_directory("hello_moveit")
+    #stero_map = "~/stero/src/STERO_24z_AntoniKowalski_TomaszZalewski/stero_map"
+    param_file = os.path.join(pkg_path, "params", "tiago_" + base_type + "_nav_public_sim.yaml")
 
 
-    map_path = os.path.join(stero_map, "maps", world_name, "map.yaml")
-    rviz_config_file = os.path.join(stero_map, "config", "rviz", "navigation.rviz")
+    map_path = os.path.join(pkg_path, "maps", world_name, "map.yaml")
+    rviz_config_file = os.path.join(pkg_path, "config", "rviz", "navigation.rviz")
 
     nav_bringup_launch = include_scoped_launch_py_description(
         pkg_name="nav2_bringup",
@@ -100,7 +100,7 @@ def public_nav_function(context, *args, **kwargs):
         pkg_name="nav2_bringup",
         paths=["launch", "rviz_launch.py"],
         launch_arguments={
-            "rviz": rviz_config_file
+            "rviz_config": rviz_config_file
         },
     )
 
@@ -114,10 +114,10 @@ def public_nav_function(context, *args, **kwargs):
 def private_nav_function(context, *args, **kwargs):
     base_type = read_launch_argument("base_type", context)
     actions = []
-    stero_map = get_package_share_directory("stero_map")
+    pkg_path = get_package_share_directory("hello_moveit")
 
     remappings_file = os.path.join(
-        stero_map, "params", "tiago_" + base_type + "_remappings_sim.yaml")
+        pkg_path, "params", "tiago_" + base_type + "_remappings_sim.yaml")
 
     nav_bringup_launch = include_scoped_launch_py_description(
         pkg_name="pal_nav2_bringup",
@@ -167,7 +167,7 @@ def private_nav_function(context, *args, **kwargs):
         package="rviz2",
         executable="rviz2",
         arguments=["-d", os.path.join(
-            stero_map,
+            pkg_path,
             "config",
             "rviz",
             "navigation.rviz",

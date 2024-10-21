@@ -28,7 +28,7 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 
 def start_gzserver(context, *args, **kwargs):
-    pkg_path = get_package_share_directory('stero_world')
+    pkg_path = get_package_share_directory('hello_moveit')
     priv_pkg_path = ''
     # try:
     #     priv_pkg_path = get_package_share_directory('pal_gazebo_worlds_private')
@@ -67,17 +67,17 @@ def start_gzserver(context, *args, **kwargs):
 
 def generate_launch_description():
     # Attempt to find pal_gazebo_worlds_private, use pal_gazebo_worlds otherwise
-    # try:
-    #     priv_pkg_path = get_package_share_directory(
-    #         'pal_gazebo_worlds_private')
-    #     model_path = os.path.join(priv_pkg_path, 'models') + pathsep
-    #     resource_path = priv_pkg_path + pathsep
-    # except Exception:
-    #     model_path = ''
-    #     resource_path = ''
+    try:
+        priv_pkg_path = get_package_share_directory(
+            'pal_gazebo_worlds_private')
+        model_path = os.path.join(priv_pkg_path, 'models') + pathsep
+        resource_path = priv_pkg_path + pathsep
+    except Exception:
+        model_path = ''
+        resource_path = ''
 
     # Add pal_gazebo_worlds path
-    pkg_path = get_package_share_directory('stero_world')
+    pkg_path = get_package_share_directory('hello_moveit')
     model_path += os.path.join(pkg_path, 'models')
     resource_path += pkg_path
 
