@@ -3,7 +3,9 @@
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
+//#include <moveit/planning_interface/move_group_interface.h>
 #include <thread>  // <---- add this to the set of includes at the top
+#include <string>
 
 using moveit::planning_interface::MoveGroupInterface;
 
@@ -31,6 +33,8 @@ int main(int argc, char * argv[])
     move_group_interface.getRobotModel()};
   moveit_visual_tools.deleteAllMarkers();
   moveit_visual_tools.loadRemoteControl();
+  
+  std::cout<<move_group_interface.getEndEffectorLink()<<std::endl;
 
   // sensor_msgs::msg::JointState msg;
   // msg.position.push_back(2.42f);

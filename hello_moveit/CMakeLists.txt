@@ -49,7 +49,7 @@ install(
 
 #ament_export_include_directories("~/stero/src/STERO_24z_AntoniKowalski_TomaszZalewski/hello_moveit/include")
 
-ament_auto_package(INSTALL_TO_SHARE config launch params)
+#ament_auto_package(INSTALL_TO_SHARE config launch params)
 
 #ament_export_include_directories("~/stero/src/STERO_24z_AntoniKowalski_TomaszZalewski/hello_moveit/include")
-#ament_auto_package(INSTALL_TO_SHARE config launch models worlds urdf meshes)
+ament_auto_package(INSTALL_TO_SHARE config launch models worlds urdf meshes)
