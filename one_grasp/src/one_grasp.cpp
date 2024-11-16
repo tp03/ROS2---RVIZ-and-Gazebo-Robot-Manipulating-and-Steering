@@ -7,6 +7,8 @@
 //#include <geometry_msgs/Pose.h>
 #include <thread>  
 #include <string>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 using moveit::planning_interface::MoveGroupInterface;
 namespace rvt = rviz_visual_tools;
@@ -19,14 +21,6 @@ int main(int argc, char * argv[])
     auto node = rclcpp::Node::make_shared("one_grasp");
 
     moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
-
-      // Create the MoveIt MoveGroup Interface
-    auto move_group_interface = MoveGroupInterface(node, "arm_torso");
-    // move_group_interface.setMaxVelocityScalingFactor(0.5);  // Zwiększamy prędkość
-    // move_group_interface.setMaxAccelerationScalingFactor(0.5);  // Zwiększamy przyspieszenie
-    // auto move_group_interface_gripper = MoveGroupInterface(node, "gripper");
-    // std::string end_effector_link = "wrist_ft_link";  // Zmienna z nazwą linku nadgarstka
-    // move_group_interface.setEndEffectorLink(end_effector_link);
 
     // Tworzymy klienta do serwisu /get_entity_state
     auto client = node->create_client<gazebo_msgs::srv::GetEntityState>("/get_entity_state");
@@ -41,6 +35,9 @@ int main(int argc, char * argv[])
     }
 
     auto move_group_interface_arm = MoveGroupInterface(node, "arm");
+
+    move_group_interface_arm.setMaxVelocityScalingFactor(0.5);  // Zwiększamy prędkość
+    move_group_interface_arm.setMaxAccelerationScalingFactor(0.5);  // Zwiększamy przyspieszenie
 
     move_group_interface_arm.setJointValueTarget(std::vector<double>{0.42, -1.26, -0.42, 2.13, -1.5, 1.4, 0.0});
     moveit::planning_interface::MoveGroupInterface::Plan plan;
@@ -60,7 +57,7 @@ int main(int argc, char * argv[])
       move_group_interface_arm.execute(plan2);
     }
 
-    move_group_interface_arm.setJointValueTarget(std::vector<double>{1.34, -0.17, -2.88, 1.57, 1.95, 1.36, 0.0});
+    move_group_interface_arm.setJointValueTarget(std::vector<double>{1.58, 0.8, 0.24, 0.1, -1.47, 0.75, 0.0});
     moveit::planning_interface::MoveGroupInterface::Plan plan3;
     auto const success3 = static_cast<bool>(move_group_interface_arm.plan(plan3));
 
@@ -69,12 +66,9 @@ int main(int argc, char * argv[])
       move_group_interface_arm.execute(plan3);
     }
 
-
-
-
     // Tworzymy obiekt MoveItVisualTools do wyświetlania w RViz
     auto moveit_visual_tools = moveit_visual_tools::MoveItVisualTools{
-    node, "base_footprint", rviz_visual_tools::RVIZ_MARKER_TOPIC, move_group_interface.getRobotModel()};
+    node, "base_footprint", rviz_visual_tools::RVIZ_MARKER_TOPIC, move_group_interface_arm.getRobotModel()};
     moveit_visual_tools.deleteAllMarkers();
     moveit_visual_tools.loadRemoteControl();
 
@@ -101,7 +95,7 @@ int main(int argc, char * argv[])
                     pose.orientation.z, 
                     pose.orientation.w);
 
-        moveit_visual_tools.publishCuboid(pose, 0.7, 0.7, 0.7, rvt::GREEN);
+        moveit_visual_tools.publishCuboid(pose, 0.07, 0.07, 0.07, rvt::GREEN);
 
         // Wyświetlenie markerów
         moveit_visual_tools.trigger();
@@ -109,26 +103,115 @@ int main(int argc, char * argv[])
 
         float end_effector_x = pose.position.x;
         float end_effector_y = pose.position.y;
-        float end_effector_z = pose.position.z + 3;
+        float end_effector_z = pose.position.z + 0.3;
 
         move_group_interface_arm.setEndEffectorLink("wrist_ft_link");
+        //move_group_interface_arm.setPoseReferenceFrame("base_footprint");
+
+        Eigen::Matrix3d rotation_matrix;
+        rotation_matrix << -1.0, 0.0,   0.0,
+                          0.0,    1.0, 0.0,
+                          0.0,    0.0,   -1.0;
+
+        // Konwersja macierzy rotacji na kwaternion
+        Eigen::Quaterniond quaternion(rotation_matrix);
 
         geometry_msgs::msg::Pose target_pose;
-        target_pose.orientation.w = -1.0;  // Przyjęcie orientacji jako jednostkowej kwaternionu
+        target_pose.orientation.w = quaternion.w(); 
+        target_pose.orientation.x = quaternion.x(); 
+        target_pose.orientation.y = quaternion.y();
+        target_pose.orientation.z = quaternion.z();// Przyjęcie orientacji jako jednostkowej kwaternionu
         target_pose.position.x = end_effector_x;     // Pozycja w metrach
         target_pose.position.y = end_effector_y;     
         target_pose.position.z = end_effector_z;
 
         move_group_interface_arm.setPoseTarget(target_pose);
         moveit::planning_interface::MoveGroupInterface::Plan plan4;
+        move_group_interface_arm.setPlanningTime(10.0);
         auto const success4 = static_cast<bool>(move_group_interface_arm.plan(plan4));
 
         if (success4)
         {
           move_group_interface_arm.execute(plan4);
         }
+        else{
+          RCLCPP_ERROR(node->get_logger(), "Object too far");
         }
 
+        moveit_msgs::msg::CollisionObject collision_object;
+        collision_object.id = "green_cube_3";
+        collision_object.header.frame_id = "base_footprint";  // Lub "base_link", zależnie od układu odniesienia
+
+        // Definiowanie kształtu obiektu (sześcian)
+        shape_msgs::msg::SolidPrimitive primitive;
+        primitive.type = primitive.BOX;
+        primitive.dimensions = {0.07, 0.07, 0.07};  // Wymiary obiektu
+
+        // Pozycja i orientacja obiektu
+        geometry_msgs::msg::Pose cube_pose;
+        cube_pose.position.x = pose.position.x;  // Współrzędne pozycji
+        cube_pose.position.y = pose.position.y;
+        cube_pose.position.z = pose.position.z;
+        cube_pose.orientation.w = pose.orientation.w;
+
+        // Dodanie kształtu i pozycji do obiektu
+        collision_object.primitives.push_back(primitive);
+        collision_object.primitive_poses.push_back(cube_pose);
+        collision_object.operation = collision_object.ADD;
+
+        // Dodanie obiektu do sceny
+        planning_scene_interface.applyCollisionObject(collision_object);
+        
+
+        auto move_group_interface_gripper = MoveGroupInterface(node, "gripper");
+        move_group_interface_gripper.setMaxVelocityScalingFactor(0.7);  // Zwiększamy prędkość
+        move_group_interface_gripper.setMaxAccelerationScalingFactor(0.7); 
+        move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.04,0.042}));
+        moveit::planning_interface::MoveGroupInterface::Plan plan5;
+        auto const success5 = static_cast<bool>(move_group_interface_gripper.plan(plan5));
+
+        if (success5)
+        {
+          move_group_interface_gripper.execute(plan5);
+        }
+
+        target_pose.position.z = end_effector_z-0.08;
+        move_group_interface_arm.setPoseTarget(target_pose);
+        moveit::planning_interface::MoveGroupInterface::Plan plan6;
+        auto const success6 = static_cast<bool>(move_group_interface_arm.plan(plan6));
+
+        if (success6)
+        {
+          move_group_interface_arm.execute(plan6);
+        }
+
+        std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
+        auto const connected = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_3", "wrist_ft_link", touch_links));
+
+        move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.03,0.03}));
+        moveit::planning_interface::MoveGroupInterface::Plan plan7;
+        auto const success7 = static_cast<bool>(move_group_interface_gripper.plan(plan7));
+
+        if (connected)
+        {
+          if (success7)
+          {
+            move_group_interface_arm.execute(plan7);
+          }
+        }
+        target_pose.position.z = target_pose.position.z + 0.05;
+        move_group_interface_arm.setPoseTarget(target_pose);
+        moveit::planning_interface::MoveGroupInterface::Plan plan8;
+        auto const success8 = static_cast<bool>(move_group_interface_arm.plan(plan8));
+
+        if (connected)
+        {
+          if (success8)
+          {
+            move_group_interface_arm.execute(plan8);
+          }
+        }
+    }
 
 
     else {
