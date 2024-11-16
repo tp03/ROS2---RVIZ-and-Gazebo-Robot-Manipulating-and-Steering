@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include "gazebo_msgs/srv/get_entity_state.hpp"
+//#include <geometry_msgs/Pose.h>
 #include <thread>  
 #include <string>
 
@@ -39,6 +40,38 @@ int main(int argc, char * argv[])
         RCLCPP_INFO(node->get_logger(), "Waiting for service /get_entity_state to be available...");
     }
 
+    auto move_group_interface_arm = MoveGroupInterface(node, "arm");
+
+    move_group_interface_arm.setJointValueTarget(std::vector<double>{0.42, -1.26, -0.42, 2.13, -1.5, 1.4, 0.0});
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    auto const success = static_cast<bool>(move_group_interface_arm.plan(plan));
+
+    if (success)
+    {
+      move_group_interface_arm.execute(plan);
+    }
+
+    move_group_interface_arm.setJointValueTarget(std::vector<double>{0.42, -1.26, -2.69, 2.13, -1.5, 1.4, 0.0});
+    moveit::planning_interface::MoveGroupInterface::Plan plan2;
+    auto const success2 = static_cast<bool>(move_group_interface_arm.plan(plan2));
+
+    if (success2)
+    {
+      move_group_interface_arm.execute(plan2);
+    }
+
+    move_group_interface_arm.setJointValueTarget(std::vector<double>{1.34, -0.17, -2.88, 1.57, 1.95, 1.36, 0.0});
+    moveit::planning_interface::MoveGroupInterface::Plan plan3;
+    auto const success3 = static_cast<bool>(move_group_interface_arm.plan(plan3));
+
+    if (success3)
+    {
+      move_group_interface_arm.execute(plan3);
+    }
+
+
+
+
     // Tworzymy obiekt MoveItVisualTools do wyświetlania w RViz
     auto moveit_visual_tools = moveit_visual_tools::MoveItVisualTools{
     node, "base_footprint", rviz_visual_tools::RVIZ_MARKER_TOPIC, move_group_interface.getRobotModel()};
@@ -71,7 +104,33 @@ int main(int argc, char * argv[])
         moveit_visual_tools.publishCuboid(pose, 0.7, 0.7, 0.7, rvt::GREEN);
 
         // Wyświetlenie markerów
-        moveit_visual_tools.trigger();}
+        moveit_visual_tools.trigger();
+
+
+        float end_effector_x = pose.position.x;
+        float end_effector_y = pose.position.y;
+        float end_effector_z = pose.position.z + 3;
+
+        move_group_interface_arm.setEndEffectorLink("wrist_ft_link");
+
+        geometry_msgs::msg::Pose target_pose;
+        target_pose.orientation.w = -1.0;  // Przyjęcie orientacji jako jednostkowej kwaternionu
+        target_pose.position.x = end_effector_x;     // Pozycja w metrach
+        target_pose.position.y = end_effector_y;     
+        target_pose.position.z = end_effector_z;
+
+        move_group_interface_arm.setPoseTarget(target_pose);
+        moveit::planning_interface::MoveGroupInterface::Plan plan4;
+        auto const success4 = static_cast<bool>(move_group_interface_arm.plan(plan4));
+
+        if (success4)
+        {
+          move_group_interface_arm.execute(plan4);
+        }
+        }
+
+
+
     else {
       RCLCPP_ERROR(node->get_logger(), "Service call failed!");
     }
