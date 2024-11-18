@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="show_side_grasps" exec="show_side_grasps" name="grasps" namespace="show_side_grasps"/>
+</launch>

@@ -18,7 +18,7 @@ int main(int argc, char * argv[])
     // Inicjalizacja ROS2
     rclcpp::init(argc, argv);
     // Tworzymy węzeł ROS
-    auto node = rclcpp::Node::make_shared("one_grasp");
+    auto node = rclcpp::Node::make_shared("pick_place");
 
     moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
@@ -157,59 +157,96 @@ int main(int argc, char * argv[])
         if (success4)
         {
           move_group_interface_arm.execute(plan4);
+
           auto move_group_interface_gripper = MoveGroupInterface(node, "gripper");
-          move_group_interface_gripper.setMaxVelocityScalingFactor(0.7);  // Zwiększamy prędkość
-          move_group_interface_gripper.setMaxAccelerationScalingFactor(0.7); 
-          move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.04,0.042}));
-          moveit::planning_interface::MoveGroupInterface::Plan plan5;
-          auto const success5 = static_cast<bool>(move_group_interface_gripper.plan(plan5));
+            move_group_interface_gripper.setMaxVelocityScalingFactor(0.7);  // Zwiększamy prędkość
+            move_group_interface_gripper.setMaxAccelerationScalingFactor(0.7); 
+            move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.04,0.042}));
+            moveit::planning_interface::MoveGroupInterface::Plan plan5;
+            auto const success5 = static_cast<bool>(move_group_interface_gripper.plan(plan5));
 
-          if (success5)
-          {
+            if (success5)
+            {
             move_group_interface_gripper.execute(plan5);
-          }
+            }
 
-          target_pose.position.z = end_effector_z-0.08;
-          move_group_interface_arm.setPoseTarget(target_pose);
-          moveit::planning_interface::MoveGroupInterface::Plan plan6;
-          auto const success6 = static_cast<bool>(move_group_interface_arm.plan(plan6));
+            target_pose.position.z = end_effector_z-0.08;
+            move_group_interface_arm.setPoseTarget(target_pose);
+            moveit::planning_interface::MoveGroupInterface::Plan plan6;
+            auto const success6 = static_cast<bool>(move_group_interface_arm.plan(plan6));
 
-          if (success6)
-          {
+            if (success6)
+            {
             move_group_interface_arm.execute(plan6);
-          }
+            }
 
-          std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
-          auto const connected = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_3", "wrist_ft_link", touch_links));
+            std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
+            auto const connected = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_3", "wrist_ft_link", touch_links));
 
-          move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.03,0.03}));
-          moveit::planning_interface::MoveGroupInterface::Plan plan7;
-          auto const success7 = static_cast<bool>(move_group_interface_gripper.plan(plan7));
+            move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.03,0.03}));
+            moveit::planning_interface::MoveGroupInterface::Plan plan7;
+            auto const success7 = static_cast<bool>(move_group_interface_gripper.plan(plan7));
 
-          if (connected)
-          {
+            if (connected)
+            {
             if (success7)
             {
-              move_group_interface_arm.execute(plan7);
+                move_group_interface_arm.execute(plan7);
             }
-          }
-          target_pose.position.z = target_pose.position.z + 0.05;
-          move_group_interface_arm.setPoseTarget(target_pose);
-          moveit::planning_interface::MoveGroupInterface::Plan plan8;
-          auto const success8 = static_cast<bool>(move_group_interface_arm.plan(plan8));
+            }
+            target_pose.position.z = target_pose.position.z + 0.05;
+            move_group_interface_arm.setPoseTarget(target_pose);
+            moveit::planning_interface::MoveGroupInterface::Plan plan8;
+            auto const success8 = static_cast<bool>(move_group_interface_arm.plan(plan8));
 
-          if (connected)
-          {
+            if (connected)
+            {
             if (success8)
             {
-              move_group_interface_arm.execute(plan8);
+                move_group_interface_arm.execute(plan8);
             }
-          }
-        }
+            }
+
+            target_pose.position.y = -target_pose.position.y;
+            move_group_interface_arm.setPoseTarget(target_pose);
+            moveit::planning_interface::MoveGroupInterface::Plan plan9;
+            auto const success9 = static_cast<bool>(move_group_interface_arm.plan(plan9));
+            if (success9)
+            {
+                move_group_interface_arm.execute(plan9);
+            }
+
+            target_pose.position.z = target_pose.position.z - 0.048;
+            move_group_interface_arm.setPoseTarget(target_pose);
+            moveit::planning_interface::MoveGroupInterface::Plan plan10;
+            auto const success10 = static_cast<bool>(move_group_interface_arm.plan(plan10));
+            if (success10)
+            {
+                move_group_interface_arm.execute(plan10);
+            }
+
+            move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.044,0.044}));
+            moveit::planning_interface::MoveGroupInterface::Plan plan11;
+            auto const success11 = static_cast<bool>(move_group_interface_gripper.plan(plan11));
+            if (success11)
+            {
+                move_group_interface_gripper.execute(plan11);
+            }
+
+            auto const detached = static_cast<bool>(move_group_interface_arm.detachObject("green_cube_3"));
+
+
+            }
         else{
           RCLCPP_ERROR(node->get_logger(), "Object too far");
         }        
     }
+
+
+    else {
+      RCLCPP_ERROR(node->get_logger(), "Service call failed!");
+    }
+
     // Shutdown ROS
     rclcpp::shutdown();
     return 0;

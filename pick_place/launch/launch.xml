@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="pick_place" exec="pick_place" name="place" namespace="pick_place"/>
+</launch>
