@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="tower_2" exec="tower_2" name="tower" namespace="tower_2">
+</launch>
