@@ -4661,20 +4661,20 @@
         </link>
       </model>
       <model name='green_cube_2'>
-        <pose>0.729579 -0.182023 0.547499 0.0 0.0 0.0</pose>
+        <pose>0.799399 -0.182023 0.547499 0.0 0.0 0.0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>0.729579 -0.182023 0.547499 0.0 0.0 0.0</pose>
+          <pose>0.799399 -0.182023 0.547499 0.0 0.0 0.0</pose>
           <velocity>-1e-06 -0 5e-06 3e-06 -8e-06 -1e-06</velocity>
           <acceleration>-0 0 0 0 -0 0</acceleration>
           <wrench>-0 0 0 0 -0 0</wrench>
         </link>
       </model>
       <model name='green_cube_3'>
-        <pose>0.527237 -0.044486 0.552499 1e-06 -1.2e-05 -0.004021</pose>
+        <pose>0.608696 -0.044486 0.552499 1e-06 -1.2e-05 -0.004021</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>0.527237 -0.044486 0.552499 1e-06 -1.2e-05 -0.004021</pose>
+          <pose>0.608696 -0.044486 0.552499 1e-06 -1.2e-05 -0.004021</pose>
           <velocity>-1e-06 -0 5e-06 3e-06 -8e-06 -1e-06</velocity>
           <acceleration>-0 0 0 0 -0 0</acceleration>
           <wrench>-0 0 0 0 -0 0</wrench>

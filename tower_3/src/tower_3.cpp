@@ -861,7 +861,7 @@ int main(int argc, char *argv[])
     // Inicjalizacja ROS2
     rclcpp::init(argc, argv);
     // Tworzymy węzeł ROS
-    auto node = rclcpp::Node::make_shared("tower_2");
+    auto node = rclcpp::Node::make_shared("tower_3");
 
     rclcpp::executors::SingleThreadedExecutor executor;
     executor.add_node(node);
@@ -926,12 +926,10 @@ int main(int argc, char *argv[])
 
     geometry_msgs::msg::Pose cube3_pose = get_cube_pose("green_cube_3", client, collision_objects);
     geometry_msgs::msg::Pose cube2_pose = get_cube_pose("green_cube_2", client, collision_objects);
-
-    RCLCPP_INFO(node->get_logger(), "here");
+    geometry_msgs::msg::Pose cube1_pose = get_cube_pose("green_cube_1", client, collision_objects);
 
     planning_scene_interface.applyCollisionObjects(collision_objects);
 
-    RCLCPP_INFO(node->get_logger(), "here2");
 
     std::vector<std::vector<geometry_msgs::msg::Pose>> cube2_vectors = get_grasps(cube2_pose);
     std::vector<geometry_msgs::msg::Pose> cube2_pre_grasps = cube2_vectors[0];
@@ -1022,6 +1020,111 @@ int main(int argc, char *argv[])
                                 }
 
                                 auto const detached = static_cast<bool>(move_group_interface_arm.detachObject("green_cube_2"));
+
+                                target_pose.position.z = target_pose.position.z + 0.15;
+                                move_group_interface_arm.setPoseTarget(target_pose);
+                                moveit::planning_interface::MoveGroupInterface::Plan plan12;
+                                auto const success12 = static_cast<bool>(move_group_interface_arm.plan(plan12));
+                                if (success12)
+                                {
+                                    move_group_interface_arm.execute(plan12);
+                                }
+
+                                std::vector<std::vector<geometry_msgs::msg::Pose>> cube1_vectors = get_grasps(cube1_pose);
+                                std::vector<geometry_msgs::msg::Pose> cube1_pre_grasps = cube1_vectors[0];
+                                std::vector<geometry_msgs::msg::Pose> cube1_grasps = cube1_vectors[1];
+
+                                for (int k = 0; k < cube1_grasps.size(); k++)
+                                {
+                                    geometry_msgs::msg::Pose target_pose = cube1_pre_grasps[k];
+
+                                    move_group_interface_arm.setPoseTarget(target_pose);
+                                    moveit::planning_interface::MoveGroupInterface::Plan plan20;
+                                    move_group_interface_arm.setPlanningTime(10.0);
+                                    auto const success20 = static_cast<bool>(move_group_interface_arm.plan(plan20));
+
+                                    if (success20)
+                                    {
+                                        move_group_interface_arm.execute(plan20);
+                                        auto move_group_interface_gripper = MoveGroupInterface(node, "gripper");
+                                        move_group_interface_gripper.setMaxVelocityScalingFactor(0.7); // Zwiększamy prędkość
+                                        move_group_interface_gripper.setMaxAccelerationScalingFactor(0.7);
+                                        move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.04, 0.042}));
+                                        moveit::planning_interface::MoveGroupInterface::Plan plan21;
+                                        auto const success21 = static_cast<bool>(move_group_interface_gripper.plan(plan21));
+
+                                        if (success21)
+                                        {
+                                            target_pose = cube1_grasps[k];
+                                            move_group_interface_gripper.execute(plan21);
+                                            move_group_interface_arm.setPoseTarget(target_pose);
+                                            moveit::planning_interface::MoveGroupInterface::Plan plan22;
+                                            auto const success22 = static_cast<bool>(move_group_interface_arm.plan(plan22));
+
+                                            if (success22)
+                                            {
+                                                move_group_interface_arm.execute(plan22);
+                                                std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
+                                                auto const connected2 = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_1", "wrist_ft_link", touch_links));
+
+                                                move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.028, 0.028}));
+                                                moveit::planning_interface::MoveGroupInterface::Plan plan23;
+                                                auto const success23 = static_cast<bool>(move_group_interface_gripper.plan(plan23));
+
+                                                if (connected2)
+                                                {
+                                                    if (success23)
+                                                    {
+                                                        move_group_interface_arm.execute(plan23);
+                                                    }
+                                                }
+
+                                                for (int l = 0; l < cube3_grasps.size(); l++)
+                                                {
+                                                    RCLCPP_INFO(node->get_logger(), "%d", l);
+                                                    geometry_msgs::msg::Pose old_pose2 = cube1_grasps[k];
+                                                    target_pose = cube3_grasps[l];
+                                                    if (std::abs(target_pose.position.z - old_pose2.position.z) < 0.005)
+                                                    {
+                                                        RCLCPP_INFO(node->get_logger(), "Good, 1: %.3f, 2: %.3f", target_pose.position.z, old_pose2.position.z);
+                                                        target_pose.position.z = target_pose.position.z + 0.33;
+                                                        move_group_interface_arm.setPoseTarget(target_pose);
+                                                        moveit::planning_interface::MoveGroupInterface::Plan plan24;
+                                                        auto const success24 = static_cast<bool>(move_group_interface_arm.plan(plan24));
+                                                        if (success24)
+                                                        {
+                                                            move_group_interface_arm.execute(plan24);
+                                                            target_pose.position.z = target_pose.position.z - 0.05;
+                                                            move_group_interface_arm.setPoseTarget(target_pose);
+                                                            moveit::planning_interface::MoveGroupInterface::Plan plan25;
+                                                            auto const success25 = static_cast<bool>(move_group_interface_arm.plan(plan25));
+                                                            if (success25)
+                                                            {
+                                                                move_group_interface_arm.execute(plan25);
+                                                            }
+
+                                                            move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.044, 0.044}));
+                                                            moveit::planning_interface::MoveGroupInterface::Plan plan26;
+                                                            auto const success26 = static_cast<bool>(move_group_interface_gripper.plan(plan26));
+                                                            if (success26)
+                                                            {
+                                                                move_group_interface_gripper.execute(plan26);
+                                                            }
+
+                                                            auto const detached = static_cast<bool>(move_group_interface_arm.detachObject("green_cube_1"));
+                                                            break;
+                                                        }    
+                                                    }
+                                                    else
+                                                    {
+                                                        RCLCPP_INFO(node->get_logger(), "Bad, 1: %.3f, 2: %.3f", target_pose.position.z, old_pose.position.z);
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }    
+                                }
                                 break;
                             }
 
