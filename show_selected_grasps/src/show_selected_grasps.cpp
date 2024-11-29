@@ -125,17 +125,18 @@ int main(int argc, char * argv[])
                     bambi = rot_z_90*rot_z_90*rot_z_90;
                 }
 
+                //rot_z_90 = rot_z_90*rot_y_minus_90; 
+
                 for (int m = 0; m < 3; m++) {
-                    
+
                     float pre_grasp = 0.0;
                     float grasp = 0.0;
-
+                    geometry_msgs::msg::Pose grasp_msg;
                     for (int i = 0; i < 3; i++) {
 
-                        moveit_msgs::msg::Grasp vis_gr;
-                        vis_gr.grasp_pose.header.frame_id = "base_footprint";
-
+                        
                         geometry_msgs::msg::Pose pose_msg;
+                        
                         if (i == 0) {
                             if (m == 0) {
                                 float _x = saved_pose.position.x;
@@ -143,27 +144,27 @@ int main(int argc, char * argv[])
                                 float _y = saved_pose.position.y;
                                 if (w == 0){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 1){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.3, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 2){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.3, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 3){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.3, saved_pose.position.y, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 4){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.3, saved_pose.position.y, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                             }
@@ -177,27 +178,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y + 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.26, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.26, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y+0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y+0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -205,27 +206,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y - 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.26, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.26, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y-0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y-0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -238,27 +239,27 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x + 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.15, saved_pose.position.y-0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.15, saved_pose.position.y+0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
 
@@ -267,27 +268,27 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x - 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.15, saved_pose.position.y-0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.15, saved_pose.position.y+0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -301,27 +302,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y - 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.26, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.26, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y-0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y-0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -329,27 +330,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y + 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.26, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.26, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y+0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y+0.15, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -362,27 +363,27 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x - 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.15, saved_pose.position.y-0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.15, saved_pose.position.y+0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -390,34 +391,34 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x + 0.15;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.15, saved_pose.position.y-0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.15, saved_pose.position.y+0.26, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.26, saved_pose.position.y, saved_pose.position.z-0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.26, saved_pose.position.y, saved_pose.position.z+0.15));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
                                     }
                                 }
                             }
-                            vis_gr.id = "grasp_1";
+                            
                         }
                         else if (i == 1) {
                             if (m == 0) {
@@ -427,27 +428,27 @@ int main(int argc, char * argv[])
 
                                  if (w == 0){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 1){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.22, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 2){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.22, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 3){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.22, saved_pose.position.y, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                                 if (w == 4){
                                     Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.22, saved_pose.position.y, saved_pose.position.z));
-                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi;
+                                    Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_y_minus_90;
                                     pose_msg = tf2::toMsg(skolim);
                                 }
                             }
@@ -461,27 +462,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y + 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.19, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.19, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y+0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y+0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -489,27 +490,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y - 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.19, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.19, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y-0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y-0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -522,27 +523,27 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x + 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.11, saved_pose.position.y-0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.11, saved_pose.position.y+0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -550,27 +551,27 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x - 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.11, saved_pose.position.y-0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.11, saved_pose.position.y+0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -584,27 +585,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y - 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.19, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.19, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y-0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y-0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -612,27 +613,27 @@ int main(int argc, char * argv[])
                                             float _y = saved_pose.position.y + 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y-0.19, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x, saved_pose.position.y+0.19, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y+0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y+0.11, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -645,27 +646,27 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x - 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.11, saved_pose.position.y-0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.11, saved_pose.position.y+0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
@@ -673,40 +674,40 @@ int main(int argc, char * argv[])
                                             float _x = saved_pose.position.x + 0.11;
                                             if (w == 0){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(_x, _y, _z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 1){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.11, saved_pose.position.y-0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 2){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.11, saved_pose.position.y+0.19, saved_pose.position.z));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 3){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x+0.19, saved_pose.position.y, saved_pose.position.z-0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                             if (w == 4){
                                                 Eigen::Isometry3d tr(Eigen::Translation3d(saved_pose.position.x-0.19, saved_pose.position.y, saved_pose.position.z+0.11));
-                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90;
+                                                Eigen::Isometry3d skolim = tr*which_side*rot_y_180*bambi*rot_x_minus_30*rot_z_90*rot_y_minus_90;
                                                 pose_msg = tf2::toMsg(skolim);
                                             }
                                         }
                                     }
                                 }
                             }
-                            vis_gr.id = "grasp_2";
+    
                         }
                         else {
                             pose_msg.position.x = saved_pose.position.x;
                             pose_msg.position.y = saved_pose.position.y;
                             pose_msg.position.z = saved_pose.position.z;
-                            vis_gr.id = "grasp_3";
+                            
 
                             pose_msg.orientation.x = saved_pose.orientation.x;
                             pose_msg.orientation.y = saved_pose.orientation.y;
@@ -714,22 +715,25 @@ int main(int argc, char * argv[])
                             pose_msg.orientation.w = saved_pose.orientation.w;
                         }
 
-                        vis_gr.grasp_pose.pose = pose_msg;
+                        moveit_visual_tools.publishAxis(pose_msg);
                         if (i == 0)
                         {
+                            grasp_msg = pose_msg;
                             pre_grasp = pose_msg.position.z;
+                            
                         }
                         else if (i == 1)
                         {
                             grasp = pose_msg.position.z;
                         }
-                        moveit_visual_tools.publishAxis(pose_msg);
-                        vis_grasps.push_back(vis_gr);
-                        RCLCPP_INFO(node->get_logger(), "Position: x = %.2f, y = %.2f, z = %.2f",
-                                    pose_msg.position.x, pose_msg.position.y, pose_msg.position.z);
-                        // RCLCPP_INFO(node->get_logger(), "Orientation: x = %.2f, y = %.2f, z = %.2f, w = %.2f",
-                        //             pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
+                             
                     }
+                    moveit_msgs::msg::Grasp vis_gr;
+                    vis_gr.grasp_pose.header.frame_id = "base_footprint";
+                    vis_gr.id = "anton";
+                    vis_gr.grasp_pose.pose = grasp_msg;
+                    std::vector<moveit_msgs::msg::Grasp> vis_grasps = {vis_gr};
+                    
 
                     if (pre_grasp > grasp)
                     {
@@ -737,14 +741,16 @@ int main(int argc, char * argv[])
                         moveit_visual_tools.trigger();
                         moveit_visual_tools.prompt("Next");
                     }
+                    
+
 
                     //moveit_visual_tools.trigger();
                     moveit_visual_tools.deleteAllMarkers();
+                    moveit_visual_tools.trigger();
                 }
             }
         }    
     }//);
-
     //executor.spin();
     rclcpp::on_shutdown([&spinner]() {
         spinner.join(); // Zamykamy wątek spinnera

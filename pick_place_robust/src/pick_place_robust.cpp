@@ -827,7 +827,7 @@ int main(int argc, char * argv[])
         // Konwersja macierzy rotacji na kwaternion
         Eigen::Quaterniond quaternion(rotation_matrix);
 
-        for (int i = 0; i < n; i++){
+        for (int i = 1; i < n; i++){
 
             geometry_msgs::msg::Pose t_pose = pre_grasps[i];
 
@@ -861,7 +861,7 @@ int main(int argc, char * argv[])
                 auto move_group_interface_gripper = MoveGroupInterface(node, "gripper");
                 move_group_interface_gripper.setMaxVelocityScalingFactor(0.7);  // Zwiększamy prędkość
                 move_group_interface_gripper.setMaxAccelerationScalingFactor(0.7); 
-                move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.04,0.042}));
+                move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.044,0.044}));
                 moveit::planning_interface::MoveGroupInterface::Plan plan5;
                 auto const success5 = static_cast<bool>(move_group_interface_gripper.plan(plan5));
 

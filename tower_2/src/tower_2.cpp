@@ -973,7 +973,7 @@ int main(int argc, char *argv[])
                     std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
                     auto const connected = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_2", "wrist_ft_link", touch_links));
 
-                    move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.028, 0.028}));
+                    move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.0275, 0.0275}));
                     moveit::planning_interface::MoveGroupInterface::Plan plan7;
                     auto const success7 = static_cast<bool>(move_group_interface_gripper.plan(plan7));
 

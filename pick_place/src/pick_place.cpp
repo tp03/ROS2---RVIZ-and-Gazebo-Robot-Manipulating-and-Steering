@@ -216,7 +216,7 @@ int main(int argc, char * argv[])
                 move_group_interface_arm.execute(plan9);
             }
 
-            target_pose.position.z = target_pose.position.z - 0.048;
+            target_pose.position.z = target_pose.position.z - 0.04;
             move_group_interface_arm.setPoseTarget(target_pose);
             moveit::planning_interface::MoveGroupInterface::Plan plan10;
             auto const success10 = static_cast<bool>(move_group_interface_arm.plan(plan10));
@@ -238,8 +238,8 @@ int main(int argc, char * argv[])
 
             }
         else{
-          RCLCPP_ERROR(node->get_logger(), "Object too far");
-        }        
+          RCLCPP_INFO(node->get_logger(), "Object too far");
+        }     
     }
 
 

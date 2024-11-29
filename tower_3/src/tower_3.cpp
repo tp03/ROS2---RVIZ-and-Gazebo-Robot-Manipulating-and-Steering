@@ -971,7 +971,7 @@ int main(int argc, char *argv[])
                     std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
                     auto const connected = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_2", "wrist_ft_link", touch_links));
 
-                    move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.028, 0.028}));
+                    move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.0275, 0.0275}));
                     moveit::planning_interface::MoveGroupInterface::Plan plan7;
                     auto const success7 = static_cast<bool>(move_group_interface_gripper.plan(plan7));
 
@@ -1067,7 +1067,7 @@ int main(int argc, char *argv[])
                                                 std::vector<std::string> touch_links = {"gripper_left_finger_link", "gripper_right_finger_link"};
                                                 auto const connected2 = static_cast<bool>(move_group_interface_arm.attachObject("green_cube_1", "wrist_ft_link", touch_links));
 
-                                                move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.028, 0.028}));
+                                                move_group_interface_gripper.setJointValueTarget(std::vector<double>({0.024, 0.024}));
                                                 moveit::planning_interface::MoveGroupInterface::Plan plan23;
                                                 auto const success23 = static_cast<bool>(move_group_interface_gripper.plan(plan23));
 
@@ -1084,10 +1084,10 @@ int main(int argc, char *argv[])
                                                     RCLCPP_INFO(node->get_logger(), "%d", l);
                                                     geometry_msgs::msg::Pose old_pose2 = cube1_grasps[k];
                                                     target_pose = cube3_grasps[l];
-                                                    if (std::abs(target_pose.position.z - old_pose2.position.z) < 0.005)
-                                                    {
+                                                    // if (true)
+                                                    // {
                                                         RCLCPP_INFO(node->get_logger(), "Good, 1: %.3f, 2: %.3f", target_pose.position.z, old_pose2.position.z);
-                                                        target_pose.position.z = target_pose.position.z + 0.33;
+                                                        target_pose.position.z = target_pose.position.z + 0.21;
                                                         move_group_interface_arm.setPoseTarget(target_pose);
                                                         moveit::planning_interface::MoveGroupInterface::Plan plan24;
                                                         auto const success24 = static_cast<bool>(move_group_interface_arm.plan(plan24));
@@ -1114,11 +1114,11 @@ int main(int argc, char *argv[])
                                                             auto const detached = static_cast<bool>(move_group_interface_arm.detachObject("green_cube_1"));
                                                             break;
                                                         }    
-                                                    }
-                                                    else
-                                                    {
-                                                        RCLCPP_INFO(node->get_logger(), "Bad, 1: %.3f, 2: %.3f", target_pose.position.z, old_pose.position.z);
-                                                    }
+                                                    // }
+                                                    // else
+                                                    // {
+                                                    //     RCLCPP_INFO(node->get_logger(), "Bad, 1: %.3f, 2: %.3f", target_pose.position.z, old_pose.position.z);
+                                                    // }
                                                 }
                                                 break;
                                             }
