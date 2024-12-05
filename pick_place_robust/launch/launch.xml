@@ -1,3 +1,4 @@
 <launch>
     <node pkg="pick_place_robust" exec="pick_place_robust" name="place" namespace="pick_place_robust"/>
 </launch>
+

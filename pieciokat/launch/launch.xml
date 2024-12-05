@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="pieciokat" exec="pieciokat" name="pieciokat" namespace="pieciokat"/>
+</launch>

@@ -1,0 +1,17 @@
+notatki ogólne:
+
+prędkość: publikuj na cmd_vel_nav
+
+ros2 topic pub /cmd_vel_nav geometry_msgs/msg/Twist "{linear: {x: 0.1, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.0}}"
+
+
+lidar
+
+informacje z czujnika lidar są dostępne na temacie scan_raw, można je odczytać za pomocą komendy ros2 topic echo \scan_raw
+
+rgbd
+
+informacje na temacie /head_front_camera/rgb/image_raw publikuje węzeł head_front_camera_frame_controller
+
+
+np robot stoi przy ściane i są same 51, image widac w rviz
