@@ -43,12 +43,12 @@ int main(int argc, char * argv[])
     for(int i = 0; i<5; i++)
     {
         auto timer_callback = [&publisher]() {
-            send_velocity(0.0, 0.5, publisher);
+            send_velocity(0.0, 0.3, publisher);
         };
         auto timer = node->create_wall_timer(1000ms, timer_callback);
         
         auto start = std::chrono::steady_clock::now();
-        while (rclcpp::ok() && std::chrono::steady_clock::now() - start < 12.5s) {
+        while (rclcpp::ok() && std::chrono::steady_clock::now() - start < 11.2s) {
             rclcpp::spin_some(node);
         }
         stop(publisher);
@@ -60,7 +60,7 @@ int main(int argc, char * argv[])
         auto timer2 = node->create_wall_timer(100ms, timer_callback2);
         
         auto start2 = std::chrono::steady_clock::now();
-        while (rclcpp::ok() && std::chrono::steady_clock::now() - start2 < 6s) {
+        while (rclcpp::ok() && std::chrono::steady_clock::now() - start2 < 3s) {
             rclcpp::spin_some(node);
         }
         stop(publisher);
