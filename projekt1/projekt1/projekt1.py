@@ -17,7 +17,7 @@ class projekt1(Node):
         self.declare_parameter('side', "rigth")
         self.declare_parameter('n', 1)
 
-        self.a = self.get_parameter('a').get_parameter_value().double_value
+        self.a = self.get_parameter('a').get_parameter_value().integer_value
         self.side = self.get_parameter('side').get_parameter_value().string_value
         self.n = self.get_parameter('n').get_parameter_value().integer_value
 
@@ -38,15 +38,13 @@ class projekt1(Node):
         cosy_cosp = 1 - 2 * (orientation_q.y**2 + orientation_q.z**2)
 
         if atan2(siny_cosp, cosy_cosp) < 0.0:
-            # self.i += 1
-            # if self.i == 1:
-            #     self.theta_perspective+= pi/2
-            self.current_position['theta'] = 2*pi - abs(atan2(siny_cosp, cosy_cosp))
-        elif atan2(siny_cosp, cosy_cosp) > 6.28:
-            # self.i += 1
-            # if self.i == 1:
-            #     self.theta_perspective+= pi/2
-            self.current_position['theta'] = 2*pi + abs(atan2(siny_cosp, cosy_cosp))
+            self.i = 1
+
+        if self.i == 1:
+            if atan2(siny_cosp, cosy_cosp) > 0.0:
+                self.current_position['theta'] = 2*pi + abs(atan2(siny_cosp, cosy_cosp))                            
+            else:
+                self.current_position['theta'] = 2*pi - abs(atan2(siny_cosp, cosy_cosp))
         else:
             self.current_position['theta'] = atan2(siny_cosp, cosy_cosp)
 
@@ -56,35 +54,26 @@ class projekt1(Node):
         time.sleep(3)
         rclpy.spin_once(self, timeout_sec=0.1)
 
-        for i in range(4):
+        for j in range(self.n):
+            for k in range(4):
 
-            self.theta_perspective = self.current_position['theta']
-            angular_distance = abs(self.current_position['theta']- self.theta_perspective)
-            er = self.desired_theta - angular_distance
-            while er > 0.011:
-                rclpy.spin_once(self, timeout_sec=0.1)
-                self.get_logger().info(f"Odległość: {angular_distance}, kąt: {self.current_position['theta']}, err: {er}")
-                self.send_velocity(0.0, 0.3)
-                angular_distance = abs(self.current_position['theta'] - self.theta_perspective)
+                self.theta_perspective = self.current_position['theta']
+                angular_distance = abs(self.current_position['theta']- self.theta_perspective)
                 er = self.desired_theta - angular_distance
+                while er > 0.011:
+                    rclpy.spin_once(self, timeout_sec=0.1)
+                    if self.side == "left":
+                        self.send_velocity(0.0, 0.3)
+                    elif self.side == "rigth":
+                        self.send_velocity(0.0, -0.3)
+                    angular_distance = abs(self.current_position['theta'] - self.theta_perspective)
+                    er = self.desired_theta - angular_distance
 
-            self.i = 0
-            self.stop()
+                self.i = 0
+                self.stop()
 
-            self.x_perspective = self.current_position['x']
-            self.y_perspective = self.current_position['y']
-
-            dx = self.current_position['x'] - self.x_perspective
-            dy = self.current_position['y'] - self.y_perspective
-
-            distance = sqrt(dx**2 + dy**2)
-
-            err = self.a - distance
-
-            while err > 0.1:
-
-                rclpy.spin_once(self, timeout_sec=0.1)
-                self.send_velocity(0.2, 0.0)
+                self.x_perspective = self.current_position['x']
+                self.y_perspective = self.current_position['y']
 
                 dx = self.current_position['x'] - self.x_perspective
                 dy = self.current_position['y'] - self.y_perspective
@@ -93,21 +82,29 @@ class projekt1(Node):
 
                 err = self.a - distance
 
-                self.get_logger().info(f"Odległość: {distance}, błąd: {err}")
+                while err > 0.1:
 
-            self.stop()
+                    rclpy.spin_once(self, timeout_sec=0.1)
+                    self.send_velocity(0.2, 0.0)
+
+                    dx = self.current_position['x'] - self.x_perspective
+                    dy = self.current_position['y'] - self.y_perspective
+
+                    distance = sqrt(dx**2 + dy**2)
+
+                    err = self.a - distance
+
+                self.stop()
 
 
 
     def send_velocity(self, linear_vel, angular_vel):
-        """Publishes a Twist message with given linear and angular velocities."""
         cmd_vel = Twist()
         cmd_vel.linear.x = linear_vel
         cmd_vel.angular.z = angular_vel
         self.publisher.publish(cmd_vel)
 
     def stop(self):
-        """Stops the robot by sending zero velocities."""
         self.send_velocity(0.0, 0.0)
 
 def main(args=None):
