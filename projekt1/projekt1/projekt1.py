@@ -26,11 +26,11 @@ class projekt1(Node):
         self.current_position = {'x': 0.0, 'y': 0.0, 'theta': 0.0}
         self.ground_truth_position = {'x': 0.0, 'y': 0.0, 'theta': 0.0}
         self.initial_position = {'x': 0.0, 'y': 0.0}
+        self.initial_orientation = 0.0
         self.position_squared_sum = 0.0
         self.orientation_squared_sum = 0.0
         self.num_samples = 0
 
-        # Report Data
         self.temporary_errors = []
         self.cumulative_errors = []
         self.start_time = time.time()
@@ -53,7 +53,7 @@ class projekt1(Node):
         cosy_cosp = 1 - 2 * (orientation_q.y**2 + orientation_q.z**2)
         return atan2(siny_cosp, cosy_cosp)
 
-    def calculate_and_accumulate_errors(self):
+    def calculate_errors(self):
         dx = self.current_position['x'] - self.ground_truth_position['x']
         dy = self.current_position['y'] - self.ground_truth_position['y']
         position_error_squared = (dx**2 + dy**2)
@@ -63,7 +63,7 @@ class projekt1(Node):
         self.orientation_squared_sum += orientation_error_squared
         self.num_samples += 1
 
-    def check_and_report_temporary_errors(self):
+    def check_temporary_errors(self):
         current_time = time.time() - self.start_time
         if current_time - self.last_report_time >= 10.0:
             mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
@@ -104,30 +104,28 @@ class projekt1(Node):
         self.generate_report()
 
     def turn(self):
-        target_theta = self.current_position['theta'] + pi / 2
-        if target_theta > pi:
-            target_theta -= 2 * pi
+        self.initial_orientation = self.current_position['theta']
+        # if target_theta > pi:
+        #     target_theta -= 2 * pi
 
-        while abs(self.current_position['theta'] - target_theta) > 0.05:  # Small threshold for precision
+        while pi/2 - abs(self.current_position['theta']-self.initial_orientation) > 0.011:
             rclpy.spin_once(self, timeout_sec=0.1)
             angular_speed = 0.3 if self.side == "left" else -0.3
             self.send_velocity(0.0, angular_speed)
 
-            # Calculate and accumulate errors
-            self.calculate_and_accumulate_errors()
-            self.check_and_report_temporary_errors()
+            self.calculate_errors()
+            self.check_temporary_errors()
         
         self.stop()
 
     def move_straight(self):
         distance = 0.0
-        while distance < self.a - 0.05:  # Small threshold for precision
+        while distance < self.a - 0.05:
             rclpy.spin_once(self, timeout_sec=0.1)
             self.send_velocity(0.2, 0.0)
 
-            # Calculate and accumulate errors
-            self.calculate_and_accumulate_errors()
-            self.check_and_report_temporary_errors()
+            self.calculate_errors()
+            self.check_temporary_errors()
 
             dx = self.current_position['x'] - self.initial_position['x']
             dy = self.current_position['y'] - self.initial_position['y']
