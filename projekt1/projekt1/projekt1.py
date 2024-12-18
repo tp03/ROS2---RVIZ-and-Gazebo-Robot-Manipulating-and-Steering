@@ -3,15 +3,17 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 import time
-from math import atan2, sqrt, pow
+from math import atan2, sqrt, pow, fabs, pi
 from numpy import pi
+import matplotlib.pyplot as plt 
 
 class projekt1(Node):
 
     def __init__(self):
         super().__init__('projekt1')
         self.publisher = self.create_publisher(Twist, '/cmd_vel_nav', 10)
-        self.subscriber = self.create_subscription(Odometry, '/mobile_base_controller/odom', self.odom_callback, 10)
+        self.odom_subscriber = self.create_subscription(Odometry, '/mobile_base_controller/odom', self.odom_callback, 10)
+        self.ground_truth_subscriber = self.create_subscription(Odometry, '/ground_truth_odom', self.ground_truth_callback, 10)
 
         self.declare_parameter('a', 3)
         self.declare_parameter('side', "rigth")
@@ -22,81 +24,116 @@ class projekt1(Node):
         self.n = self.get_parameter('n').get_parameter_value().integer_value
 
         self.current_position = {'x': 0.0, 'y': 0.0, 'theta': 0.0}
-        self.x_perspective = 0.0  
-        self.y_perspective = 0.0 
-        self.theta_perspective = 0.0 
-        self.desired_theta = pi/2
+        self.ground_truth_position = {'x': 0.0, 'y': 0.0, 'theta': 0.0}
+        self.initial_position = {'x': 0.0, 'y': 0.0}
+        self.position_squared_sum = 0.0
+        self.orientation_squared_sum = 0.0
+        self.num_samples = 0
 
-        self.i = 0
+        # Report Data
+        self.temporary_errors = []
+        self.cumulative_errors = []
+        self.start_time = time.time()
+        self.last_report_time = 0.0
 
     def odom_callback(self, msg):
+        """Callback from /mobile_base_controller/odom."""
         self.current_position['x'] = msg.pose.pose.position.x
         self.current_position['y'] = msg.pose.pose.position.y
+        self.current_position['theta'] = self.quaternion_to_yaw(msg.pose.pose.orientation)
 
-        orientation_q = msg.pose.pose.orientation
+    def ground_truth_callback(self, msg):
+        """Callback from /ground_truth_odom."""
+        self.ground_truth_position['x'] = msg.pose.pose.position.x
+        self.ground_truth_position['y'] = msg.pose.pose.position.y
+        self.ground_truth_position['theta'] = self.quaternion_to_yaw(msg.pose.pose.orientation)
+
+    def quaternion_to_yaw(self, orientation_q):
         siny_cosp = 2 * (orientation_q.w * orientation_q.z + orientation_q.x * orientation_q.y)
         cosy_cosp = 1 - 2 * (orientation_q.y**2 + orientation_q.z**2)
+        return atan2(siny_cosp, cosy_cosp)
 
-        if atan2(siny_cosp, cosy_cosp) < 0.0:
-            self.i = 1
+    def calculate_and_accumulate_errors(self):
+        dx = self.current_position['x'] - self.ground_truth_position['x']
+        dy = self.current_position['y'] - self.ground_truth_position['y']
+        position_error_squared = (dx**2 + dy**2)
+        orientation_error_squared = fabs(self.current_position['theta'] - self.ground_truth_position['theta'])**2
 
-        if self.i == 1:
-            if atan2(siny_cosp, cosy_cosp) > 0.0:
-                self.current_position['theta'] = 2*pi + abs(atan2(siny_cosp, cosy_cosp))                            
-            else:
-                self.current_position['theta'] = 2*pi - abs(atan2(siny_cosp, cosy_cosp))
-        else:
-            self.current_position['theta'] = atan2(siny_cosp, cosy_cosp)
+        self.position_squared_sum += position_error_squared
+        self.orientation_squared_sum += orientation_error_squared
+        self.num_samples += 1
 
+    def check_and_report_temporary_errors(self):
+        current_time = time.time() - self.start_time
+        if current_time - self.last_report_time >= 10.0:
+            mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
+            mean_orientation_error = sqrt(self.orientation_squared_sum / self.num_samples)
+
+            self.temporary_errors.append((int(current_time), mean_position_error, mean_orientation_error))
+            self.last_report_time = current_time
 
     def move(self):
-
+        self.get_logger().info("Starting robot movement...")
         time.sleep(3)
-        rclpy.spin_once(self, timeout_sec=0.1)
+        self.start_time = time.time()
+        self.last_report_time = 0.0
+        self.position_error_sum = 0.0
+        self.orientation_error_sum = 0.0
+        self.num_samples = 0
+        for loop_index in range(self.n):
 
-        for j in range(self.n):
-            for k in range(4):
+            for side in range(4):
+                self.get_logger().info(f"Starting side {side + 1} of loop {loop_index + 1}")
+                self.initial_position['x'] = self.current_position['x']
+                self.initial_position['y'] = self.current_position['y']
 
-                self.theta_perspective = self.current_position['theta']
-                angular_distance = abs(self.current_position['theta']- self.theta_perspective)
-                er = self.desired_theta - angular_distance
-                while er > 0.011:
-                    rclpy.spin_once(self, timeout_sec=0.1)
-                    if self.side == "left":
-                        self.send_velocity(0.0, 0.3)
-                    elif self.side == "rigth":
-                        self.send_velocity(0.0, -0.3)
-                    angular_distance = abs(self.current_position['theta'] - self.theta_perspective)
-                    er = self.desired_theta - angular_distance
+                self.move_straight()
 
-                self.i = 0
-                self.stop()
+                self.turn()
 
-                self.x_perspective = self.current_position['x']
-                self.y_perspective = self.current_position['y']
+            mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
+            mean_orientation_error = sqrt(self.orientation_squared_sum / self.num_samples)
+            self.cumulative_errors.append((loop_index + 1, mean_position_error, mean_orientation_error))
 
-                dx = self.current_position['x'] - self.x_perspective
-                dy = self.current_position['y'] - self.y_perspective
+            self.get_logger().info(
+                f"Loop {loop_index + 1} Complete - Cumulative Errors: Position: {mean_position_error:.6f}, "
+                f"Orientation: {mean_orientation_error:.6f}"
+            )
 
-                distance = sqrt(dx**2 + dy**2)
+        self.stop()
+        self.generate_report()
 
-                err = self.a - distance
+    def turn(self):
+        target_theta = self.current_position['theta'] + pi / 2
+        if target_theta > pi:
+            target_theta -= 2 * pi
 
-                while err > 0.1:
+        while abs(self.current_position['theta'] - target_theta) > 0.05:  # Small threshold for precision
+            rclpy.spin_once(self, timeout_sec=0.1)
+            angular_speed = 0.3 if self.side == "left" else -0.3
+            self.send_velocity(0.0, angular_speed)
 
-                    rclpy.spin_once(self, timeout_sec=0.1)
-                    self.send_velocity(0.2, 0.0)
+            # Calculate and accumulate errors
+            self.calculate_and_accumulate_errors()
+            self.check_and_report_temporary_errors()
+        
+        self.stop()
 
-                    dx = self.current_position['x'] - self.x_perspective
-                    dy = self.current_position['y'] - self.y_perspective
+    def move_straight(self):
+        distance = 0.0
+        while distance < self.a - 0.05:  # Small threshold for precision
+            rclpy.spin_once(self, timeout_sec=0.1)
+            self.send_velocity(0.2, 0.0)
 
-                    distance = sqrt(dx**2 + dy**2)
+            # Calculate and accumulate errors
+            self.calculate_and_accumulate_errors()
+            self.check_and_report_temporary_errors()
 
-                    err = self.a - distance
+            dx = self.current_position['x'] - self.initial_position['x']
+            dy = self.current_position['y'] - self.initial_position['y']
+            distance = sqrt(dx**2 + dy**2)
 
-                self.stop()
-
-
+        self.stop()
 
     def send_velocity(self, linear_vel, angular_vel):
         cmd_vel = Twist()
@@ -106,6 +143,46 @@ class projekt1(Node):
 
     def stop(self):
         self.send_velocity(0.0, 0.0)
+    
+    def generate_report(self):
+        self.get_logger().info("\n===================== Temporary Errors =====================")
+        self.get_logger().info(f"{'Second':<10} {'Position':<10} {'Orientation':<10}")
+        for t, pos, orient in self.temporary_errors:
+            self.get_logger().info(f"{t:<10.1f} {pos:<10.6f} {orient:<10.6f}")
+
+        self.get_logger().info("\n===================== Cumulative Errors =====================")
+        self.get_logger().info(f"{'Loop':<10} {'Position':<10} {'Orientation':<10}")
+        for loop, pos, orient in self.cumulative_errors:
+            self.get_logger().info(f"{loop:<10} {pos:<10.6f} {orient:<10.6f}")
+        
+        times, temp_pos, temp_orient = zip(*self.temporary_errors)
+        loops, cum_pos, cum_orient = zip(*self.cumulative_errors)
+
+        plt.figure(figsize=(15, 5))
+        plt.subplot(1, 3, 1)
+        plt.plot(times, temp_pos, 'o-',label='Position Error')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Error')
+        plt.title('Temporary Errors')
+        plt.legend()
+
+        plt.subplot(1, 3, 2)
+        plt.plot(times, temp_orient, 'o-',label='Orientation Error')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Error')
+        plt.title('Temporary Errors')
+        plt.legend()
+
+        plt.subplot(1, 3, 3)
+        plt.plot(loops, cum_pos, 'o-', label='Position Error')
+        plt.plot(loops, cum_orient, 'o-', label='Orientation Error')
+        plt.xlabel('Loop')
+        plt.ylabel('Error')
+        plt.title('Cumulative Errors')
+        plt.legend()
+
+        plt.tight_layout()
+        plt.show()
 
 def main(args=None):
     rclpy.init(args=args)

@@ -1,0 +1,29 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/antek/tiago/install/play_motion2/include/**",
+        "/home/antek/tiago/install/play_motion2_msgs/include/**",
+        "/home/antek/tiago/install/pal_gazebo_plugins/include/**",
+        "/home/antek/tiago/install/gazebo_version_helpers/include/**",
+        "/home/antek/tiago_public_ws/install/play_motion2/include/**",
+        "/home/antek/tiago_public_ws/install/play_motion2_msgs/include/**",
+        "/home/antek/tiago_public_ws/install/pal_gazebo_plugins/include/**",
+        "/home/antek/tiago_public_ws/install/gazebo_version_helpers/include/**",
+        "/home/antek/ros2_ws/install/turtlesim/include/**",
+        "/opt/ros/iron/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
