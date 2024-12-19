@@ -26,6 +26,7 @@ class projekt1(Node):
         self.current_position = {'x': 0.0, 'y': 0.0, 'theta': 0.0}
         self.ground_truth_position = {'x': 0.0, 'y': 0.0, 'theta': 0.0}
         self.initial_position = {'x': 0.0, 'y': 0.0}
+        self.fixed_degree = 0.0
         self.initial_orientation = 0.0
         self.position_squared_sum = 0.0
         self.orientation_squared_sum = 0.0
@@ -35,6 +36,12 @@ class projekt1(Node):
         self.cumulative_errors = []
         self.start_time = time.time()
         self.last_report_time = 0.0
+        self.i = 0
+
+        self.position_error_sum = 0.0
+        self.orientation_error_sum = 0.0
+
+
 
     def odom_callback(self, msg):
         """Callback from /mobile_base_controller/odom."""
@@ -42,11 +49,27 @@ class projekt1(Node):
         self.current_position['y'] = msg.pose.pose.position.y
         self.current_position['theta'] = self.quaternion_to_yaw(msg.pose.pose.orientation)
 
+        if self.quaternion_to_yaw(msg.pose.pose.orientation) < 0.0:
+
+            self.i = 1
+
+        if self.i == 1:
+            if self.quaternion_to_yaw(msg.pose.pose.orientation) > 0.0:
+                self.fixed_degree = 2*pi + abs(self.quaternion_to_yaw(msg.pose.pose.orientation))                            
+            else:
+                self.fixed_degree = 2*pi - abs(self.quaternion_to_yaw(msg.pose.pose.orientation))
+        else:
+            self.fixed_degree = self.quaternion_to_yaw(msg.pose.pose.orientation)
+
     def ground_truth_callback(self, msg):
         """Callback from /ground_truth_odom."""
         self.ground_truth_position['x'] = msg.pose.pose.position.x
         self.ground_truth_position['y'] = msg.pose.pose.position.y
         self.ground_truth_position['theta'] = self.quaternion_to_yaw(msg.pose.pose.orientation)
+
+        self.calculate_errors()
+        self.check_temporary_errors()
+
 
     def quaternion_to_yaw(self, orientation_q):
         siny_cosp = 2 * (orientation_q.w * orientation_q.z + orientation_q.x * orientation_q.y)
@@ -64,22 +87,16 @@ class projekt1(Node):
         self.num_samples += 1
 
     def check_temporary_errors(self):
-        current_time = time.time() - self.start_time
-        if current_time - self.last_report_time >= 10.0:
-            mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
-            mean_orientation_error = sqrt(self.orientation_squared_sum / self.num_samples)
+        # current_time = time.time() - self.start_time
+        mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
+        mean_orientation_error = sqrt(self.orientation_squared_sum / self.num_samples)
 
-            self.temporary_errors.append((int(current_time), mean_position_error, mean_orientation_error))
-            self.last_report_time = current_time
+        self.temporary_errors.append(( mean_position_error, mean_orientation_error))
+        # self.last_report_time = current_time
 
     def move(self):
         self.get_logger().info("Starting robot movement...")
         time.sleep(3)
-        self.start_time = time.time()
-        self.last_report_time = 0.0
-        self.position_error_sum = 0.0
-        self.orientation_error_sum = 0.0
-        self.num_samples = 0
         for loop_index in range(self.n):
 
             for side in range(4):
@@ -90,6 +107,7 @@ class projekt1(Node):
                 self.move_straight()
 
                 self.turn()
+                self.i = 0
 
             mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
             mean_orientation_error = sqrt(self.orientation_squared_sum / self.num_samples)
@@ -104,15 +122,16 @@ class projekt1(Node):
         self.generate_report()
 
     def turn(self):
-        self.initial_orientation = self.current_position['theta']
+        self.initial_orientation = self.fixed_degree
+        angle_accumulated = abs(self.fixed_degree-self.initial_orientation)
 
-        while pi/2 - abs(self.current_position['theta']-self.initial_orientation) > 0.011:
+        while pi/2 -  angle_accumulated > 0.005:
             rclpy.spin_once(self, timeout_sec=0.1)
             angular_speed = 0.3 if self.side == "left" else -0.3
             self.send_velocity(0.0, angular_speed)
 
-            self.calculate_errors()
-            self.check_temporary_errors()
+            
+            angle_accumulated = abs(self.fixed_degree-self.initial_orientation)
         
         self.stop()
 
@@ -122,8 +141,8 @@ class projekt1(Node):
             rclpy.spin_once(self, timeout_sec=0.1)
             self.send_velocity(0.2, 0.0)
 
-            self.calculate_errors()
-            self.check_temporary_errors()
+            # self.calculate_errors()
+            # self.check_temporary_errors()
 
             dx = self.current_position['x'] - self.initial_position['x']
             dy = self.current_position['y'] - self.initial_position['y']
@@ -143,27 +162,27 @@ class projekt1(Node):
     def generate_report(self):
         self.get_logger().info("\n===================== Temporary Errors =====================")
         self.get_logger().info(f"{'Second':<10} {'Position':<10} {'Orientation':<10}")
-        for t, pos, orient in self.temporary_errors:
-            self.get_logger().info(f"{t:<10.1f} {pos:<10.6f} {orient:<10.6f}")
+        for pos, orient in self.temporary_errors[::10]:
+            self.get_logger().info(f" {pos:<10.6f} {orient:<10.6f}")
 
         self.get_logger().info("\n===================== Cumulative Errors =====================")
         self.get_logger().info(f"{'Loop':<10} {'Position':<10} {'Orientation':<10}")
         for loop, pos, orient in self.cumulative_errors:
             self.get_logger().info(f"{loop:<10} {pos:<10.6f} {orient:<10.6f}")
         
-        times, temp_pos, temp_orient = zip(*self.temporary_errors)
+        temp_pos, temp_orient = zip(*self.temporary_errors)
         loops, cum_pos, cum_orient = zip(*self.cumulative_errors)
 
         plt.figure(figsize=(15, 5))
         plt.subplot(1, 3, 1)
-        plt.plot(times, temp_pos, 'o-',label='Position Error')
+        plt.plot(temp_pos, 'o-',label='Position Error')
         plt.xlabel('Time (s)')
         plt.ylabel('Error')
         plt.title('Temporary Errors')
         plt.legend()
 
         plt.subplot(1, 3, 2)
-        plt.plot(times, temp_orient, 'o-',label='Orientation Error')
+        plt.plot(temp_orient, 'o-',label='Orientation Error')
         plt.xlabel('Time (s)')
         plt.ylabel('Error')
         plt.title('Temporary Errors')
