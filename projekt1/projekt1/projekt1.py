@@ -41,6 +41,9 @@ class projekt1(Node):
         self.position_error_sum = 0.0
         self.orientation_error_sum = 0.0
 
+        self.x_perspective = 0.0
+        self.y_perspective = 0.0
+
 
 
     def odom_callback(self, msg):
@@ -48,6 +51,7 @@ class projekt1(Node):
         self.current_position['x'] = msg.pose.pose.position.x
         self.current_position['y'] = msg.pose.pose.position.y
         self.current_position['theta'] = self.quaternion_to_yaw(msg.pose.pose.orientation)
+        #self.fixed_degree = self.quaternion_to_yaw(msg.pose.pose.orientation)
 
         if self.quaternion_to_yaw(msg.pose.pose.orientation) < 0.0:
 
@@ -97,17 +101,49 @@ class projekt1(Node):
     def move(self):
         self.get_logger().info("Starting robot movement...")
         time.sleep(3)
+        rclpy.spin_once(self, timeout_sec=0.1)
         for loop_index in range(self.n):
 
             for side in range(4):
-                self.get_logger().info(f"Starting side {side + 1} of loop {loop_index + 1}")
-                self.initial_position['x'] = self.current_position['x']
-                self.initial_position['y'] = self.current_position['y']
+                self.theta_perspective = self.fixed_degree
+                angular_distance = abs(self.fixed_degree- self.theta_perspective)
+                er = pi/2 - angular_distance
+                while er > 0.011:
+                    rclpy.spin_once(self, timeout_sec=0.1)
+                    if self.side == "left":
+                        self.send_velocity(0.0, 0.3)
+                    elif self.side == "rigth":
+                        self.send_velocity(0.0, -0.3)
+                    angular_distance = abs(self.fixed_degree - self.theta_perspective)
+                    er = pi/2 - angular_distance
 
-                self.move_straight()
-
-                self.turn()
                 self.i = 0
+                self.stop()
+
+                self.x_perspective = self.current_position['x']
+                self.y_perspective = self.current_position['y']
+
+                dx = self.current_position['x'] - self.x_perspective
+                dy = self.current_position['y'] - self.y_perspective
+
+                distance = sqrt(dx**2 + dy**2)
+
+                err = self.a - distance
+
+                while err > 0.1:
+
+                    rclpy.spin_once(self, timeout_sec=0.1)
+                    self.send_velocity(0.2, 0.0)
+
+                    dx = self.current_position['x'] - self.x_perspective
+                    dy = self.current_position['y'] - self.y_perspective
+
+                    distance = sqrt(dx**2 + dy**2)
+
+                    err = self.a - distance
+
+                self.stop()
+
 
             mean_position_error = sqrt(self.position_squared_sum / self.num_samples)
             mean_orientation_error = sqrt(self.orientation_squared_sum / self.num_samples)
@@ -121,34 +157,6 @@ class projekt1(Node):
         self.stop()
         self.generate_report()
 
-    def turn(self):
-        self.initial_orientation = self.fixed_degree
-        angle_accumulated = abs(self.fixed_degree-self.initial_orientation)
-
-        while pi/2 -  angle_accumulated > 0.005:
-            rclpy.spin_once(self, timeout_sec=0.1)
-            angular_speed = 0.3 if self.side == "left" else -0.3
-            self.send_velocity(0.0, angular_speed)
-
-            
-            angle_accumulated = abs(self.fixed_degree-self.initial_orientation)
-        
-        self.stop()
-
-    def move_straight(self):
-        distance = 0.0
-        while distance < self.a - 0.05:
-            rclpy.spin_once(self, timeout_sec=0.1)
-            self.send_velocity(0.2, 0.0)
-
-            # self.calculate_errors()
-            # self.check_temporary_errors()
-
-            dx = self.current_position['x'] - self.initial_position['x']
-            dy = self.current_position['y'] - self.initial_position['y']
-            distance = sqrt(dx**2 + dy**2)
-
-        self.stop()
 
     def send_velocity(self, linear_vel, angular_vel):
         cmd_vel = Twist()
@@ -176,14 +184,14 @@ class projekt1(Node):
         plt.figure(figsize=(15, 5))
         plt.subplot(1, 3, 1)
         plt.plot(temp_pos, 'o-',label='Position Error')
-        plt.xlabel('Time (s)')
+        plt.xlabel('Iteration')
         plt.ylabel('Error')
         plt.title('Temporary Errors')
         plt.legend()
 
         plt.subplot(1, 3, 2)
         plt.plot(temp_orient, 'o-',label='Orientation Error')
-        plt.xlabel('Time (s)')
+        plt.xlabel('Iteration')
         plt.ylabel('Error')
         plt.title('Temporary Errors')
         plt.legend()

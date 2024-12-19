@@ -17,42 +17,49 @@ W przeciwieństwie do zadawania czasu ruchu i obrotu jak na laboratoriach nr 1, 
 
 Robot będzie wprawiany w ruch liniowy lub obrotowy, a w między czasie liczony będzie dystans pokonany przez robota, albo obrót wykonany przez robota. Gdy osięgnięta zostanie odpowiednia długość boku lub obrót o 90 stopnii, robot jest zatrzymywany.
 
-Poniżej zaprezentowano dwie funkcje:  
-1. **`move_straight()`** - do ruchu liniowego robota.  
-2. **`turn()`** - do ruchu obrotowego robota.  
-
-Poniżej znajdują się kody funkcji:
+Poniżej znajdują się kod funkcji odpowiedzialny na ruch:
 
 ```python
-    def turn(self):
-        self.initial_orientation = self.fixed_degree
-        angle_accumulated = abs(self.fixed_degree-self.initial_orientation)
+for loop_index in range(self.n):
 
-        while pi/2 -  angle_accumulated > 0.005:
+    for side in range(4):
+        self.theta_perspective = self.fixed_degree
+        angular_distance = abs(self.fixed_degree- self.theta_perspective)
+        er = pi/2 - angular_distance
+        while er > 0.011:
             rclpy.spin_once(self, timeout_sec=0.1)
-            angular_speed = 0.3 if self.side == "left" else -0.3
-            self.send_velocity(0.0, angular_speed)
+            if self.side == "left":
+               self.send_velocity(0.0, 0.3)
+            elif self.side == "rigth":
+                self.send_velocity(0.0, -0.3)
+                angular_distance = abs(self.fixed_degree - self.theta_perspective)
+                er = pi/2 - angular_distance
 
-            self.calculate_errors()
-            self.check_temporary_errors()
-            angle_accumulated = abs(self.fixed_degree-self.initial_orientation)
-        
-        self.stop()
+            self.i = 0
+            self.stop()
 
-    def move_straight(self):
-        distance = 0.0
-        while distance < self.a - 0.05:
-            rclpy.spin_once(self, timeout_sec=0.1)
-            self.send_velocity(0.2, 0.0)
+            self.x_perspective = self.current_position['x']
+            self.y_perspective = self.current_position['y']
 
-            self.calculate_errors()
-            self.check_temporary_errors()
+            dx = self.current_position['x'] - self.x_perspective
+            dy = self.current_position['y'] - self.y_perspective
 
-            dx = self.current_position['x'] - self.initial_position['x']
-            dy = self.current_position['y'] - self.initial_position['y']
             distance = sqrt(dx**2 + dy**2)
+            err = self.a - distance
 
-        self.stop()
+            while err > 0.1:
+
+                rclpy.spin_once(self, timeout_sec=0.1)
+                self.send_velocity(0.2, 0.0)
+
+                dx = self.current_position['x'] - self.x_perspective
+                dy = self.current_position['y'] - self.y_perspective
+
+                distance = sqrt(dx**2 + dy**2)
+
+                err = self.a - distance
+
+            self.stop()
 ```
 
 ---
@@ -154,7 +161,7 @@ def generate_report(self):
 Tablica wygenerowana dla ruchu przy zadanych dwóch pętlach pokazana jest poniżej.
 ![alt text](image-1.png)
 Oprócz tego generowany jest na podstawie tych danych wykres.
-![alt text](image-4.png)
+![alt text](projekt1/foty/wykresy2.png)
 Jak widać na osiągniętych wynikach błąd orientacji jest nieco wyższy od błędu pozycji. Zauważyć można momenty obrotu robota, w trakcie ruchu do przodu błąd orientacji jest stały i dużo niższy, z drugiej strony, kiedy zaczyna się on obracać, błąd ten znacząco rośnie.
 
 Błąd skumulowany zwiększa się z każdą pętlą co wynika z tego że jest on sumą poprzednich błędów.
