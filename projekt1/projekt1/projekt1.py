@@ -105,8 +105,6 @@ class projekt1(Node):
 
     def turn(self):
         self.initial_orientation = self.current_position['theta']
-        # if target_theta > pi:
-        #     target_theta -= 2 * pi
 
         while pi/2 - abs(self.current_position['theta']-self.initial_orientation) > 0.011:
             rclpy.spin_once(self, timeout_sec=0.1)

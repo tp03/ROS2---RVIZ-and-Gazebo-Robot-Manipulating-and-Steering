@@ -5,8 +5,8 @@
 Naszym zadaniem było stworzenie systemu, który umożliwi poruszanie robotem po obwodzie pięciokąta. Aby tego dokonać, musieliśmy najpierw zidentyfikować odpowiednie tematy i węzły, na które należy publikować dane sterujące.  
 
 Za pomocą narzędzi **rqt_graph** oraz komendy `ros2 topic echo` zidentyfikowaliśmy:
-- Węzeł **`/cmd_vel_nav`** do zadawania prędkości.  
-- Węzeł **`/mobile_base_controller/odom`** do odczytywania odometrii robota.  
+- Temat **`/cmd_vel_nav`** do zadawania prędkości.  
+- Temat **`/mobile_base_controller/odom`** do odczytywania odometrii robota.  
 
 ### Przykład publikacji prędkości  
 Struktura komendy do zadawania prędkości liniowej i kątowej na węzeł **`/cmd_vel_nav`** z poziomu terminala wygląda następująco:  
