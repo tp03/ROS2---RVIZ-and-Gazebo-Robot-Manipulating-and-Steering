@@ -165,3 +165,11 @@ Oprócz tego generowany jest na podstawie tych danych wykres.
 Jak widać na osiągniętych wynikach błąd orientacji jest nieco wyższy od błędu pozycji. Zauważyć można momenty obrotu robota, w trakcie ruchu do przodu błąd orientacji jest stały i dużo niższy, z drugiej strony, kiedy zaczyna się on obracać, błąd ten znacząco rośnie.
 
 Błąd skumulowany zwiększa się z każdą pętlą co wynika z tego że jest on sumą poprzednich błędów.
+
+## Architektura systemu robota-kelnera
+Stworzone zostały trzy diagramy dla trzech poziomów abstrakcji naszego systemu. Diagramy przedstawione zostały poniżej.
+![alt text](image-5.png)
+![alt text](image-6.png)
+![alt text](image-7.png)
+Pierwszy diagram przedstawia najwyższy spośród przedstawionych poziomów abstrakcji, gdzie przedstawione są ogólne procesy działań robota. Następny diagram przedstawia relację między systemem nawigacji robota a innymi systemami w robocie.
+Ostatni diagram przedstawia konkretne moduły i czujniki robota, których używa do wyonywania swoich zadań.
