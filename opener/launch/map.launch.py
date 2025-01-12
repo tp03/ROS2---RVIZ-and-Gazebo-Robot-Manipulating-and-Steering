@@ -15,6 +15,8 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 
+from launch.actions import TimerAction
+
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -60,10 +62,8 @@ def public_nav_function(context, *args, **kwargs):
     actions = []
     pkg_path = get_package_share_directory("opener")
     pkg_path2 = get_package_share_directory("tiago_2dnav")
-    print(f"\n\n\n\n {pkg_path} \n\n\n")
     #stero_map = "~/stero/src/STERO_24z_AntoniKowalski_TomaszZalewski/stero_map"
     param_file = os.path.join(pkg_path2, "params", "tiago_" + base_type + "_nav_public_sim.yaml")
-
 
     map_path = os.path.join(pkg_path, "maps", world_name, "map.yaml")
     rviz_config_file = os.path.join(pkg_path, "config", "rviz", "navigation.rviz")
@@ -106,10 +106,10 @@ def public_nav_function(context, *args, **kwargs):
         },
     )
 
-    actions.append(nav_bringup_launch)
-    actions.append(slam_bringup_launch)
-    actions.append(loc_bringup_launch)
-    actions.append(rviz_bringup_launch)
+    actions.append(TimerAction(period=5.0, actions=[nav_bringup_launch]))
+    actions.append(TimerAction(period=5.0, actions=[slam_bringup_launch]))
+    actions.append(TimerAction(period=5.0, actions=[loc_bringup_launch]))
+    actions.append(TimerAction(period=5.0, actions=[rviz_bringup_launch]))
     return actions
 
 

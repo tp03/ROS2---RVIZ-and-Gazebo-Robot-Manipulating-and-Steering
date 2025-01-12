@@ -80,9 +80,6 @@ def declare_actions(
             "resource_paths": packages,
         })
 
-    print(launch_args.world_name)
-    print("\n")
-    print("\n\n\n\n\n")
     launch_description.add_action(gazebo)
 
     navigation = include_scoped_launch_py_description(
