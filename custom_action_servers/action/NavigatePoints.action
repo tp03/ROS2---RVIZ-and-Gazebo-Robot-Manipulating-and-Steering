@@ -1,0 +1,6 @@
+geometry_msgs/PoseStamped[] waypoints  
+---
+bool success                    
+---
+float32 progress
+int32 current_index        
