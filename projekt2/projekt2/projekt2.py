@@ -2,13 +2,16 @@ import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Path
 from nav2_simple_commander.robot_navigator import BasicNavigator
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint   
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint  
+from nav2_msgs.action import FollowWaypoints 
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseStamped
 from rclpy.action import ActionServer, ActionClient
 from custom_action_servers.action import NavigatePoints
 import math
+import time
+from action_msgs.msg import GoalStatus
 
 class projekt2(Node):
 
@@ -20,24 +23,23 @@ class projekt2(Node):
         self.head_publisher = self.create_publisher(JointTrajectory, '/head_controller/joint_trajectory', 10)
         self.velocity_subscriber = self.create_subscription(Twist, '/cmd_vel_nav', self.velocity_callback, 10)
         self.odom_subscriber = self.create_subscription(Odometry, '/mobile_base_controller/odom', self.odom_callback, 10)
+        self.follow_waypoints_client = ActionClient(self, FollowWaypoints, 'follow_waypoints')
         self.action_server = ActionServer(self, NavigatePoints, 'navigate_points', self.server_callback)
         self.action_client = ActionClient(self, NavigatePoints, 'navigate_points')
 
         self.current_velocity = 0.0
 
-        self.previous_pose = [0.0, 0.0]
-        self.current_pose = [0.0, 0.0]  
+        self.previous_pose = []
+        self.current_pose = [] 
 
         self.distance_made = 0.0
-
-        self.finished = False
     
     def odom_callback(self, msg):
 
         self.previous_pose = self.current_pose
         self.current_pose = [msg.pose.pose.position.x, msg.pose.pose.position.y]
+        self.previous_pose = self.current_pose if self.previous_pose == [] else self.previous_pose
 
-        #if self.previous_pose is not []:
         dx = self.current_pose[0] - self.previous_pose[0]
         dy = self.current_pose[1] - self.previous_pose[1]
         self.distance_made += math.sqrt(dx**2 + dy**2)
@@ -50,6 +52,15 @@ class projekt2(Node):
         else:
             angle = self.current_velocity*math.pi/3
             self.move_head(angle)
+
+    def wait_for_initial_pose(self, timeout=5.0):
+        start_time = self.get_clock().now()
+        while self.previous_pose is None:
+            rclpy.spin_once(self, timeout_sec=0.1)
+            if self.get_clock().now() - start_time > timeout:
+                return False
+        return True
+
 
     def move_head(self, head_1_angle, time_from_start=1):
 
@@ -99,35 +110,64 @@ class projekt2(Node):
             length += segment_length
         return length
 
-    async def server_callback(self, goal_handle):
+    def isNavComplete(self):
+        if not self.result_future:
+            return True
+        rclpy.spin_until_future_complete(self, self.result_future, timeout_sec=0.10)
+        if self.result_future.result():
+            self.status = self.result_future.result().status
+            if self.status != GoalStatus.STATUS_SUCCEEDED:
+                return True
+        else:
+            return False
+        return True
+        
+    def followWaypoints(self, poses):
+
+        while not self.follow_waypoints_client.wait_for_server(timeout_sec=1.0):
+            pass
+
+        goal_msg = FollowWaypoints.Goal()
+        goal_msg.poses = poses
+
+        send_goal_future = self.follow_waypoints_client.send_goal_async(goal_msg)
+        rclpy.spin_until_future_complete(self, send_goal_future)
+        self.goal_handle = send_goal_future.result()
+
+        if not self.goal_handle.accepted:
+            return False
+
+        self.result_future = self.goal_handle.get_result_async()
+        return True
+
+    def server_callback(self, goal_handle):
+
+        self.wait_for_initial_pose()
 
         self.get_logger().info('Nawiązano połączenie!')
 
+        rclpy.spin_once(self, timeout_sec=0.1)
+
         feedback = NavigatePoints.Feedback()
-
         points = goal_handle.request.waypoints
-
-        self.basic_navigator.followWaypoints(points)
-
         path_points = Path()
-
-        begin_pose = self.make_pose_stamped(0.0, 0.0, 0.0)
-
-        path_points = self.basic_navigator.getPathThroughPoses(begin_pose, points)
-
+        begin_p = self.make_pose_stamped(self.current_pose[0], self.current_pose[1], 0.0)
+        path_points = self.basic_navigator.getPathThroughPoses(begin_p, points)
         full_distance = self.calculate_path_length(path_points.poses)
 
+        self.followWaypoints(points)
 
-        while not self.finished:
-
+        while not self.isNavComplete():
             rclpy.spin_once(self, timeout_sec=0.1)
-            self.get_logger().info(f"Distance: {self.distance_made/full_distance*100}%")
             feedback.progress = self.distance_made/full_distance*100
             goal_handle.publish_feedback(feedback)
-            # rate = self.create_timer(2)
-            # rate.sleep()    
+         
+        goal_handle.succeed()
+        self.get_logger().info("Zakończono") 
+        result = NavigatePoints.Result()
+        result.success = True
 
-        return NavigatePoints.Result(success=True)    
+        return NavigatePoints.Result(success=True)
 
     def send_server_goal(self, points):
 
@@ -141,14 +181,8 @@ class projekt2(Node):
 
         goal_msg.waypoints = prepared_points
 
-        # if not goal_msg.accepted:
-        #     self.get_logger().info('Goal rejected :(')
-        #     return
-
-        # self.get_logger().info('Goal accepted :)')
-
-        self.action_client.wait_for_server()
-        self.action_client.send_goal_async(goal_msg).add_done_callback(self.goal_response_callback)
+        self._send_goal_future = self.action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+        self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
@@ -157,19 +191,19 @@ class projekt2(Node):
             return
 
         self.get_logger().info('Żądanie zaakceptowane.')
-        goal_handle.get_result_async().add_done_callback(self.result_callback)
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.result_callback)
 
     def result_callback(self, future):
         result = future.result().result
         if result.success:
             self.get_logger().info('Wszystkie punkty osiągnięte.')
-            self.finished = True
         else:
             self.get_logger().info('Nie udało się osiągnąć wszystkich punktów.')
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        self.get_logger().info(f'Wykonano procent ścieżki: {feedback.progress}%')
+        self.get_logger().info(f'Wykonano procent ścieżki: {round(feedback.progress)}%')
 
 
 def main(args=None):
@@ -185,6 +219,7 @@ def main(args=None):
     ]
 
     try:
+        time.sleep(3)
         node.send_server_goal(points)
         rclpy.spin(node)        
     except KeyboardInterrupt:
